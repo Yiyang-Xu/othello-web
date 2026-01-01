@@ -120,24 +120,82 @@ body {
   font-size: 14px;
 }
 
-/* ✅ Hover preview: target cell outline */
-.cell.preview-target::before {
+/* ✅ 预览目标格：不需要任何方框语言 */
+.cell.preview-target {}
+
+/* ✅ Ghost piece：就是一个半透明棋子 */
+.piece.ghost {
+  opacity: 0.42;
+  transform: scale(0.98);
+  filter: saturate(0.95);
+}
+
+/* 让 ghost 更“浮”一点（可选） */
+.cell.preview-target .piece.ghost {
+  box-shadow: 0 10px 22px rgba(0,0,0,0.14);
+}
+
+/* ✅ 被翻转预览：用伪元素叠在棋子上（环 + 虚影） */
+.cell.preview-to-black .piece,
+.cell.preview-to-white .piece {
+  position: relative;
+}
+
+/* 虚影（tint overlay） */
+.cell.preview-to-black .piece::before,
+.cell.preview-to-white .piece::before {
   content: "";
   position: absolute;
-  inset: 6%;
-  border-radius: 12px;
-  outline: 2px dashed rgba(255, 255, 255, 0.8);
+  inset: 0;
+  border-radius: 999px;
   pointer-events: none;
 }
 
-/* ✅ Hover preview: flips glow */
-.cell.preview-flip .piece {
-  outline: 3px solid rgba(11, 58, 87, 0.6);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+/* 环（ring） */
+.cell.preview-to-black .piece::after,
+.cell.preview-to-white .piece::after {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 999px;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 3px solid transparent;
 }
+
+/* 将翻成黑：白棋子变暗 + 黑环 */
+.cell.preview-to-black .piece::before {
+  background: rgba(0, 0, 0, 0.22);
+}
+.cell.preview-to-black .piece::after {
+  border-color: rgba(0, 0, 0, 0.92);
+}
+
+/* 将翻成白：黑棋子变亮 + 白环 */
+.cell.preview-to-white .piece::before {
+  background: rgba(255, 255, 255, 0.18);
+}
+.cell.preview-to-white .piece::after {
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+/* ✅ 平滑一点 */
+.cell .piece,
+.cell .piece::before,
+.cell .piece::after {
+  transition: opacity 140ms ease, transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
 
 /* ✅ Ghost piece on target */
 .piece.ghost {
   opacity: 0.45;
   transform: scale(0.98);
 }
+
+/* 关键：所有棋子/提示层不参与鼠标命中，点击永远落在 button.cell 上 */
+.cell .piece,
+.cell .hint {
+  pointer-events: none;
+}
+

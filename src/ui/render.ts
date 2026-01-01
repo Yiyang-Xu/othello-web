@@ -82,13 +82,15 @@ export function mountApp(root: HTMLElement, initial: GameState) {
     });
   });
 
-  function renderCell(cellEl: HTMLButtonElement, idx: number, cell: Cell, legalSet: Set<number>, previewTarget: number | null, previewFlipSet: Set<number>) {
+  function renderCell(cellEl: HTMLButtonElement, idx: number, cell: Cell, legalSet: Set<number>, previewTarget: number | null, previewFlipSet: Set<number>, previewTo: "black" | "white" | null) {
     cellEl.classList.toggle("last", state.lastMove === idx);
     cellEl.classList.toggle("flipped", state.lastFlipped.includes(idx));
 
     // ✅ NEW: preview classes
     cellEl.classList.toggle("preview-target", previewTarget === idx);
-    cellEl.classList.toggle("preview-flip", previewFlipSet.has(idx));
+    // ✅ preview flip will turn into which color
+    cellEl.classList.toggle("preview-to-black", previewFlipSet.has(idx) && previewTo === "black");
+    cellEl.classList.toggle("preview-to-white", previewFlipSet.has(idx) && previewTo === "white");
 
     // 清空内容
     cellEl.innerHTML = "";
@@ -101,20 +103,23 @@ export function mountApp(root: HTMLElement, initial: GameState) {
       return;
     }
 
-    // 空格：合法落子提示点
-    if (legalSet.has(idx) && state.status !== "gameover") {
-      const hint = document.createElement("div");
-      hint.className = "hint";
-      cellEl.appendChild(hint);
+    const isLegalEmpty = cell === 0 && legalSet.has(idx) && state.status !== "gameover";
+    const isPreviewTarget = previewTarget === idx;
+
+    // 空格：如果是 preview target -> 不画 hint，直接画 ghost
+    if (isLegalEmpty && !isPreviewTarget) {
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        cellEl.appendChild(hint);
     }
   
-  // ✅ NEW: hover 时在目标格显示 ghost piece
-    if (previewTarget === idx && legalSet.has(idx) && state.status !== "gameover") {
-      const ghost = document.createElement("div");
-      ghost.className = `piece ghost ${state.current === BLACK ? "black" : "white"}`;
-      cellEl.appendChild(ghost);
+    // hover 时在目标格显示 ghost piece
+    if (isLegalEmpty && isPreviewTarget) {
+        const ghost = document.createElement("div");
+        ghost.className = `piece ghost ${state.current === BLACK ? "black" : "white"}`;
+        cellEl.appendChild(ghost);
     }
-  }
+}
 
   function render() {
     const legal = getLegalMoves(state);
@@ -124,12 +129,14 @@ export function mountApp(root: HTMLElement, initial: GameState) {
     // ✅ NEW: 计算 hover preview flips
     let previewTarget: number | null = null;
     let previewFlipSet = new Set<number>();
+    let previewTo: "black" | "white" | null = null;
 
     if (hoverIdx !== null && legalSet.has(hoverIdx) && state.status !== "gameover") {
       const flips = getFlips(state.board, hoverIdx, state.current);
       if (flips.length > 0) {
         previewTarget = hoverIdx;
         previewFlipSet = new Set(flips);
+        previewTo = state.current === BLACK ? "black" : "white"; // ✅ 将要翻成谁
       }
     }
 
@@ -143,7 +150,7 @@ export function mountApp(root: HTMLElement, initial: GameState) {
 
     // 更新棋盘格子
     for (let i = 0; i < 64; i++) {
-      renderCell(cells[i], i, state.board[i], legalSet, previewTarget, previewFlipSet);
+      renderCell(cells[i], i, state.board[i], legalSet, previewTarget, previewFlipSet, previewTo);
     }
   }
 
