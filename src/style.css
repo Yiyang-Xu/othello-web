@@ -119,3 +119,25 @@ body {
   color: rgba(11, 58, 87, 0.8);
   font-size: 14px;
 }
+
+/* ✅ Hover preview: target cell outline */
+.cell.preview-target::before {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 12px;
+  outline: 2px dashed rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* ✅ Hover preview: flips glow */
+.cell.preview-flip .piece {
+  outline: 3px solid rgba(11, 58, 87, 0.6);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+}
+
+/* ✅ Ghost piece on target */
+.piece.ghost {
+  opacity: 0.45;
+  transform: scale(0.98);
+}
