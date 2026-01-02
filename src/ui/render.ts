@@ -163,6 +163,59 @@ import { getFlips } from "../core/rules";
 
 type FaceColor = "black" | "white";
 
+// ===== SFX (Web Audio) =====
+let audioCtx: AudioContext | null = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+function playPlaceClickAt(t: number) {
+  const ctx = ensureAudio();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "square";
+  osc.frequency.setValueAtTime(220, t);
+  osc.frequency.exponentialRampToValueAtTime(140, t + 0.03);
+
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(t);
+  osc.stop(t + 0.06);
+}
+
+function playFlipAt(t: number) {
+  const ctx = ensureAudio();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(520, t);
+  osc.frequency.exponentialRampToValueAtTime(260, t + 0.05);
+
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.06, t + 0.006);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(t);
+  osc.stop(t + 0.08);
+}
+
+
+
 export function mountApp(root: HTMLElement, initial: GameState) {
   let state = initial;
 
@@ -171,7 +224,9 @@ export function mountApp(root: HTMLElement, initial: GameState) {
 
   // ✅ animation guard
   let lastAnimatedMove: number | null = null;
+  let lastFlipSoundMove: number | null = null; // ✅ NEW: flip sound guard
   const flipping = new Set<number>();
+  let lastPoppedMove: number | null = null; // ✅ NEW
 
   root.innerHTML = `
     <div class="container">
@@ -242,8 +297,25 @@ export function mountApp(root: HTMLElement, initial: GameState) {
     cellBtn.addEventListener("mouseleave", clearHover);
 
     cellBtn.addEventListener("click", () => {
+      // 先判断这一步是否会改变 lastMove（即确实落子）
+      const prevLastMove = state.lastMove;
       state = tryPlay(state, i);
       hoverIdx = null;
+      const moved = state.lastMove !== null && state.lastMove !== prevLastMove;
+
+      if (moved) {
+          const ctx = ensureAudio();        // ✅ 在用户手势内解锁
+          const t0 = ctx.currentTime;
+
+          // 1) 落子 click 立刻
+          playPlaceClickAt(t0);
+
+          // 2) 如果有翻转：70ms 后 flip（在手势内“预定”）
+          if (state.lastFlipped.length > 0) {
+          playFlipAt(t0 + 0.07);
+        }
+      }
+
       render();
     });
 
@@ -290,6 +362,8 @@ export function mountApp(root: HTMLElement, initial: GameState) {
       hoverIdx = null;
       lastAnimatedMove = null;
       flipping.clear();
+      lastPoppedMove = null; // ✅ NEW
+      lastFlipSoundMove = null;
       render();
     });
   });
@@ -349,6 +423,25 @@ export function mountApp(root: HTMLElement, initial: GameState) {
     // ✅ trigger flip animations once per move
     if (state.lastMove !== null && state.lastMove !== lastAnimatedMove) {
       lastAnimatedMove = state.lastMove;
+      if (state.lastMove !== null && state.lastMove !== lastAnimatedMove) {
+        lastAnimatedMove = state.lastMove;
+
+        // // ✅ 有翻转才播放 flip，且延迟 70ms；同一步只排一次
+        // if (state.lastFlipped.length > 0 && state.lastMove !== lastFlipSoundMove) {
+        //     lastFlipSoundMove = state.lastMove;
+        //     setTimeout(() => {
+        //     // 双保险：防止重开局或状态变化导致乱响
+        //     if (state.lastMove === lastFlipSoundMove) playFlip();
+        //     }, 500);
+        // }
+
+        for (const f of state.lastFlipped) {
+            const to = state.board[f] === BLACK ? "black" : "white";
+            const from = to === "black" ? "white" : "black";
+            startFlip(f, from, to);
+        }
+      }
+
 
       // 被翻的棋子：旧色 = 反色，新色 = 当前棋盘上的颜色（已经翻完）
       for (const f of state.lastFlipped) {
