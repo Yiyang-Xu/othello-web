@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="gBody" cx="30%" cy="26%" r="80%">
+      <stop offset="0%" stop-color="#ffffff"></stop>
+      <stop offset="55%" stop-color="#f0f1f4"></stop>
+      <stop offset="100%" stop-color="#d7dbe2"></stop>
+    </radialGradient>
+
+    <radialGradient id="gSpec" cx="26%" cy="22%" r="40%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"></stop>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.35"></stop>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+    </radialGradient>
+
+    <radialGradient id="gShade" cx="74%" cy="82%" r="60%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"></stop>
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.08"></stop>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.16"></stop>
+    </radialGradient>
+
+    <filter id="innerShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feOffset dx="0" dy="3" in="SourceAlpha" result="off"></feOffset>
+      <feGaussianBlur stdDeviation="4" in="off" result="blur"></feGaussianBlur>
+      <feComposite in="blur" in2="SourceAlpha" operator="out" result="inv"></feComposite>
+      <feColorMatrix in="inv" type="matrix" values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 .25 0" result="shadow"></feColorMatrix>
+      <feComposite in="shadow" in2="SourceGraphic" operator="over"></feComposite>
+    </filter>
+  </defs>
+
+  <circle cx="128" cy="128" r="108" fill="url(#gBody)" filter="url(#innerShadow)"></circle>
+  <circle cx="128" cy="128" r="108" fill="url(#gShade)"></circle>
+  <circle cx="128" cy="128" r="108" fill="url(#gSpec)"></circle>
+
+  <!-- rim -->
+  <circle cx="128" cy="128" r="108" fill="none" stroke="#000000" stroke-opacity="0.14" stroke-width="3"></circle>
+  <circle cx="128" cy="128" r="103" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2"></circle>
+</svg>
