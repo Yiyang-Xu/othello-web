@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220">
+  <defs>
+    <!-- Wood grain -->
+    <filter id="woodNoise" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="noise"></feTurbulence>
+      <feColorMatrix in="noise" type="matrix" values="
+          0.9 0   0   0  0
+          0   0.7 0   0  0
+          0   0   0.4 0  0
+          0   0   0   1  0" result="tinted"></feColorMatrix>
+      <feGaussianBlur in="tinted" stdDeviation="0.6" result="blur"></feGaussianBlur>
+      <feBlend in="SourceGraphic" in2="blur" mode="overlay"></feBlend>
+    </filter>
+
+    <!-- Soft vignette -->
+    <radialGradient id="vignette" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.0"></stop>
+      <stop offset="65%" stop-color="#000000" stop-opacity="0.06"></stop>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.14"></stop>
+    </radialGradient>
+
+    <!-- Base wood gradient -->
+    <linearGradient id="woodBase" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2e2c5"></stop>
+      <stop offset="55%" stop-color="#e4cfa6"></stop>
+      <stop offset="100%" stop-color="#d7ba87"></stop>
+    </linearGradient>
+
+    <!-- Edge wood (darker) -->
+    <linearGradient id="woodEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a532d"></stop>
+      <stop offset="100%" stop-color="#5a3a1d"></stop>
+    </linearGradient>
+
+    <!-- Inner bevel -->
+    <linearGradient id="bevel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"></stop>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.08"></stop>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.18"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer edge -->
+  <rect x="8" y="8" width="344" height="204" rx="22" fill="url(#woodEdge)"></rect>
+
+  <!-- Inner base -->
+  <rect x="18" y="18" width="324" height="184" rx="18" fill="url(#woodBase)" filter="url(#woodNoise)"></rect>
+
+  <!-- Inner bevel line -->
+  <rect x="22" y="22" width="316" height="176" rx="16" fill="none" stroke="url(#bevel)" stroke-width="6"></rect>
+
+  <!-- Subtle vignette -->
+  <rect x="18" y="18" width="324" height="184" rx="18" fill="url(#vignette)"></rect>
+
+  <!-- Tiny screws (optional, adds boardgame feel) -->
+  <circle cx="36" cy="36" r="4.5" fill="#2b1a0f" opacity="0.45"></circle>
+  <circle cx="324" cy="36" r="4.5" fill="#2b1a0f" opacity="0.45"></circle>
+  <circle cx="36" cy="184" r="4.5" fill="#2b1a0f" opacity="0.45"></circle>
+  <circle cx="324" cy="184" r="4.5" fill="#2b1a0f" opacity="0.45"></circle>
+</svg>

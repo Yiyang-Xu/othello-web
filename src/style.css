@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-  max-width: 860px;
+  /* max-width: 860px; */
   margin: 0 auto;
 }
 
@@ -365,6 +365,224 @@ body {
   inset: 0;
   pointer-events: none;
 }
+
+/* ===== Game Layout (board centered, player cards on sides) ===== */
+.main.game-layout{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;  /* ✅ 关键：左右对称撑开，中间天然正中 */
+  align-items: center;
+  gap: 30px;
+  padding-top: 40px;
+  position: relative;
+}
+
+/* 左右面板贴近棋盘（而不是在各自列里居中飘着） */
+.player-side.left{ justify-self: end; }
+.player-side.right{ justify-self: start; }
+
+/* 中间棋盘严格居中 */
+.board-wrap{ justify-self: center; }
+
+.board-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* message centered under board */
+.main.game-layout .message {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  opacity: 0.9;
+}
+
+/* player side */
+.player-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-card{
+  width: 250px;
+  height: 140px;
+  border-radius: 18px;
+  padding: 18px 18px 14px;
+  position: relative;
+
+  background: url("/ui/player-plaque.svg") center / cover no-repeat;
+}
+
+/* 内容层，保证文字/棋子在木牌上更清晰 */
+.player-card::after{
+  content:"";
+  position:absolute;
+  inset: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  pointer-events:none;
+}
+.player-card > *{ position: relative; z-index: 1; }
+
+/* 字体颜色统一成你品牌色 */
+.player-score,
+.player-name{
+  color: #0b3a57;
+}
+
+.player-piece {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.mini-piece {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* 如果你现在棋子是用 svg url skin：这里跟你已有的 piece 资源一致即可 */
+.mini-piece.white {
+  background-image: url("/pieces/s2-modern-white.svg");
+}
+.mini-piece.black {
+  background-image: url("/pieces/s2-modern-black.svg");
+}
+
+.player-meta {
+  text-align: center;
+}
+
+.player-score{
+  font-size: 28px;
+  font-weight: 900;
+  color: #0b3a57;
+}
+
+.player-name{
+  margin-top: 4px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: rgba(11,58,87,0.9);
+}
+
+/* YOUR TURN blink */
+.turn-text{
+  margin-top: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #0b3a57;
+  opacity: 0;           /* 默认不显示但占位，避免布局跳动 */
+  user-select: none;
+}
+
+.turn-text.active{
+  opacity: 1;
+  animation: turnBlink 1.0s infinite;
+}
+
+@keyframes turnBlink{
+  0%,100%{ opacity: 0.25; }
+  50%{ opacity: 1; }
+}
+
+/* responsive: stack on narrow screens */
+@media (max-width: 900px) {
+  .main.game-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .player-side.left { order: 1; }
+  .board-wrap { order: 2; }
+  .player-side.right { order: 3; }
+}
+
+
+/* right-top icon button */
+/* Restart icon button: icon + text in #0b3a57 */
+.icon-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+
+  /* button surface: light so dark icon is visible */
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(11, 58, 87, 0.22);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;              /* 如果以后加文字会用到 */
+  cursor: pointer;
+  padding: 0;
+
+  /* text color (if any) */
+  color: #0b3a57;
+}
+
+.icon-btn:hover {
+  border-color: rgba(11, 58, 87, 0.34);
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* masked svg icon color */
+.icon-btn .icon {
+  width: 22px;
+  height: 22px;
+
+  background-color: #0b3a57; /* ✅ icon color */
+
+  -webkit-mask: url("/icons/restart.svg") center / contain no-repeat;
+  mask: url("/icons/restart.svg") center / contain no-repeat;
+}
+
+body {
+  background:
+    radial-gradient(1100px 600px at 50% 35%, rgba(255,255,255,0.08), rgba(255,255,255,0) 60%),
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 50% 20%, #1a2633 0%, #0f1720 55%, #0b1118 100%);
+  background-size: auto, 80px 80px, 80px 80px, auto;
+  min-height: 100vh;
+}
+
+/* ===== Style 1: felt ===== */
+:root{
+  --bg-vignette: rgba(0,0,0,.45);
+  --bg-dim: rgba(0,0,0,.18);
+}
+
+body{
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(1200px 800px at 50% 40%, rgba(255,255,255,.06), rgba(0,0,0,0) 60%),
+    radial-gradient(1400px 1000px at 50% 50%, rgba(0,0,0,0), var(--bg-vignette) 70%),
+    url("/bg/felt.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* 轻微“压暗层”，让背景更稳，不抢棋盘 */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.05), var(--bg-dim));
+}
+
 
 
 

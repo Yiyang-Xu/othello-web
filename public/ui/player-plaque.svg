@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220">
+  <defs>
+    <!-- 木牌形状（用于裁剪所有效果，保证外面完全透明） -->
+    <clipPath id="plaqueClip">
+      <rect x="10" y="10" width="340" height="200" rx="22"></rect>
+    </clipPath>
+
+    <linearGradient id="woodRim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a532d"></stop>
+      <stop offset="100%" stop-color="#5a3a1d"></stop>
+    </linearGradient>
+
+    <linearGradient id="woodBase" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2e2c5"></stop>
+      <stop offset="55%" stop-color="#e3cfa6"></stop>
+      <stop offset="100%" stop-color="#d2b27f"></stop>
+    </linearGradient>
+
+    <!-- 纹理：先生成噪声，再用 SourceAlpha 裁剪，绝不外溢 -->
+    <filter id="grainClipped" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="9" result="noise"></feTurbulence>
+      <feColorMatrix in="noise" type="matrix" values="
+          0.95 0    0    0  0
+          0    0.75 0    0  0
+          0    0    0.45 0  0
+          0    0    0    1  0" result="tone"></feColorMatrix>
+      <feGaussianBlur in="tone" stdDeviation="0.6" result="blur"></feGaussianBlur>
+      <!-- 关键：用 SourceAlpha 作为 mask，把噪声裁到当前形状里 -->
+      <feComposite in="blur" in2="SourceAlpha" operator="in" result="grain"></feComposite>
+      <feBlend in="SourceGraphic" in2="grain" mode="overlay"></feBlend>
+    </filter>
+
+    <!-- 内侧高光描边 -->
+    <linearGradient id="bevel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"></stop>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.08"></stop>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.18"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- 注意：这里没有任何“背景矩形”，画布外必定透明 -->
+
+  <g clip-path="url(#plaqueClip)">
+    <!-- 外框 -->
+    <rect x="10" y="10" width="340" height="200" rx="22" fill="url(#woodRim)"></rect>
+    <!-- 内木面 -->
+    <rect x="20" y="20" width="320" height="180" rx="18" fill="url(#woodBase)" filter="url(#grainClipped)"></rect>
+    <!-- 内侧高光 -->
+    <rect x="24" y="24" width="312" height="172" rx="16" fill="none" stroke="url(#bevel)" stroke-width="6"></rect>
+
+    <!-- 螺丝孔（很轻） -->
+    <circle cx="38" cy="38" r="4.2" fill="#2b1a0f" opacity="0.45"></circle>
+    <circle cx="322" cy="38" r="4.2" fill="#2b1a0f" opacity="0.45"></circle>
+    <circle cx="38" cy="182" r="4.2" fill="#2b1a0f" opacity="0.45"></circle>
+    <circle cx="322" cy="182" r="4.2" fill="#2b1a0f" opacity="0.45"></circle>
+  </g>
+</svg>
